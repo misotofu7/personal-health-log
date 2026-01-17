@@ -12,12 +12,21 @@ function formatDate(date) {
 function getDaysInMonth(year, month) { 
   const days = [];
   const date = new Date(year, month, 1); // creates a new date on the first day of the month
+  
+const firstWeekDay = new Date(year, month, 1).getDay(); // 0-6
+
+
+// Add empty slots for days before the first
+for (let i = 0; i < firstWeekDay; i++) {
+  days.push(null); // empty cell
+}
 
   while (date.getMonth() === month) {
     days.push(new Date(date)); // pushing a pointer-like object onto the days array?
     date.setDate(date.getDate() + 1); // keep getting each date one day at a time
      
   }
+  
 
   return days;
 }
@@ -72,7 +81,7 @@ export const Calendar = () => {
     if (!acc[post.date]) acc[post.date] = [];
     acc[post.date].push(post);
     return acc;
-  }, {});
+  }, {}); // 
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -112,6 +121,7 @@ export const Calendar = () => {
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2">
         {days.map((day) => {
+            if (!day) return <div></div>; // empty cell
           const key = formatDate(day);
           const dayPosts = postsByDate[key] || [];
 
