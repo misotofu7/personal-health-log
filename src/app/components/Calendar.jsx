@@ -135,6 +135,7 @@ export const Calendar = () => {
             if (!day) return <div key = {`empty-${i}`}></div>; // fix to the empty cell issue
           const key = formatDate(day);
           const dayPosts = postsByDate[key] || [];
+          const currDate = new Date();
 
           return (
             <div
@@ -147,7 +148,7 @@ export const Calendar = () => {
             > 
 
               <div className="text-sm font-semibold text-blue-900 mb-1">
-                {day.getDate()}
+                {formatDate(currDate) === key ? <div className="flex items-center justify-center rounded-full w-6 h-6 bg-red-500 text-white"> {day.getDate()} </div> : day.getDate()}
               </div>
 
               <div className="space-y-1">
