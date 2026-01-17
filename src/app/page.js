@@ -1,19 +1,34 @@
 import Image from "next/image";
+import ThemeToggle from "./components/ThemeToggle";
 
 export default function Home() {
   return (
-    <main>
-      <header>
-        <h1 className="main-title">Personal Health Log</h1>
+    <main className="page">
+      <header className="top-bar">
+        <ThemeToggle />
       </header>
 
-      <p className="center-text muted">Log symptoms and view them on a calendar.</p>
+      <h1 className="main-title">Personal Health Log</h1>
 
-      <div className="input-wrapper">
-        <textarea
-          placeholder="Describe your symptoms."
-          rows={4}
-        />
+      <div className="card">
+        <p className="muted">Log symptoms and view them on a calendar.</p>
+
+        <div className="textarea-wrapper">
+          <textarea
+            id="symptoms"
+            placeholder="Describe your symptoms..."
+            rows={4}
+          />
+          <button
+            type="button"
+            className="voice-button"
+            aria-label="Voice input"
+          >
+            🎤 Voice
+          </button>
+        </div>
+
+        <button className="save-button">Save entry</button>
       </div>
     </main>
   );
