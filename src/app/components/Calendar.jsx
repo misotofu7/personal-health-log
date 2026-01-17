@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getFromStorage, saveToStorage } from "../lib/storage";
 
+import { ModalPopup } from "./ModalPopup";
+
 /* note that Date objects are built into javascript as pre-existing classes */
 
 function formatDate(date) {
@@ -39,10 +41,13 @@ export const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [phrase, setPhrase] = useState("");
 
+  const [ isModalOpen, setModalOpen ] = useState(false);
+
   /* Load posts */
   useEffect(() => {
     setPosts(getFromStorage("calendarPosts", []));
   }, []);
+
 
   /* Month navigation */
   function prevMonth() {
@@ -55,6 +60,8 @@ export const Calendar = () => {
     setCurrentMonth(
       (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
     );
+    
+    //but, if you try to go ahead, you cannot 
   }
 
   /* Add post */
@@ -65,6 +72,7 @@ export const Calendar = () => {
       id: crypto.randomUUID(),
       date: selectedDate,
       timestamp: Date.now(),
+      tags: [],
       phrase,
     };
 
@@ -85,10 +93,13 @@ export const Calendar = () => {
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const days = getDaysInMonth(year, month);
+  const days = getDaysInMonth(year, month); // existing javascript function
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
+     <button className="px-3 bg-blue-200 rounded-lg hover:scale-105" onClick = {() => {setModalOpen(!isModalOpen)}}> test button </button>
+
+      { isModalOpen ? ( <ModalPopup isModal = {() => setModalOpen(false)}/>) : null }
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">
@@ -98,13 +109,13 @@ export const Calendar = () => {
         <div className="space-x-2">
           <button
             onClick={prevMonth}
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            className="px-3 py-1 rounded text-black bg-gray-200 hover:bg-blue-200"
           >
             ← Prev
           </button>
           <button
             onClick={nextMonth}
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            className="px-3 py-1 rounded text-black bg-gray-200 hover:bg-blue-200"
           >
             Next →
           </button>
@@ -120,8 +131,8 @@ export const Calendar = () => {
 
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2">
-        {days.map((day) => {
-            if (!day) return <div></div>; // empty cell
+        {days.map((day, i) => {
+            if (!day) return <div key = {`empty-${i}`}></div>; // fix to the empty cell issue
           const key = formatDate(day);
           const dayPosts = postsByDate[key] || [];
 
@@ -130,11 +141,12 @@ export const Calendar = () => {
               key={key}
               onClick={() => setSelectedDate(key)}
               className={`border rounded p-2 min-h-[100px] cursor-pointer
-                hover:bg-gray-100
-                ${selectedDate === key ? "bg-blue-100" : "bg-white"}
+                hover:bg-blue-200
+                ${selectedDate === key ? "bg-purple-500" : "bg-white"} 
               `}
-            >
-              <div className="text-sm font-semibold mb-1">
+            > 
+
+              <div className="text-sm font-semibold text-blue-900 mb-1">
                 {day.getDate()}
               </div>
 
@@ -142,7 +154,7 @@ export const Calendar = () => {
                 {dayPosts.map((post) => (
                   <div
                     key={post.id}
-                    className="bg-blue-200 text-blue-900 text-xs px-1 py-0.5 rounded"
+                    className="bg-pink-200 text-blue-900 text-xs px-1 py-0.5 rounded"
                   >
                     {post.phrase}
                   </div>
@@ -176,6 +188,10 @@ export const Calendar = () => {
           </div>
         </div>
       )}
+
+ 
     </div>
+
+    
   );
 }

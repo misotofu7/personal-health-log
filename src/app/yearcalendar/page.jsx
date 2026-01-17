@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ViewToggle } from "../components/ViewToggle";
 import { Calendar } from "../components/Calendar";
 import { YearCalendar } from "../components/YearCalendar";
+import { ModalPopup } from "../components/ModalPopup";
 
 /* note that Date objects are built into javascript as pre-existing classes */
 
@@ -14,7 +15,7 @@ export default function Home() {
     
         <main>
 
-            <YearCalendar/>
+            <ModalPopup/>
 
          
         </main>

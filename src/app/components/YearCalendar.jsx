@@ -10,6 +10,15 @@ function formatDate(date) {
 function getDaysInMonth(year, month) {
   const days = [];
   const date = new Date(year, month, 1);
+
+const firstWeekDay = new Date(year, month, 1).getDay(); // 0-6
+
+
+// Add empty slots for days before the first
+for (let i = 0; i < firstWeekDay; i++) {
+  days.push(null); // empty cell
+}
+
   while (date.getMonth() === month) {
     days.push(new Date(date));
     date.setDate(date.getDate() + 1);
@@ -99,9 +108,10 @@ export const YearCalendar = () => {
 
               {/* Days */}
               <div className="grid grid-cols-7 gap-1">
-                {days.map(day => {
+                {days.map((day, i) => {
+                    if(!day) return <div key = {`empty-${i}`}></div>;
                   const key = formatDate(day);
-                  const dayPosts = postsByDate[key] || [];
+                  const dayPosts = postsByDate[key] || []; // either has posts or does not
 
                   return (
                     <div
