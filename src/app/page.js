@@ -9,22 +9,20 @@ export default function Home() {
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
+      <p className="muted">Log symptoms and view them on a calendar.</p>
 
-      <div className="card">
-        <p className="muted">Log symptoms and view them on a calendar.</p>
-
+      <div>
         <div className="textarea-wrapper">
           <textarea
             id="symptoms"
             placeholder="Describe your symptoms..."
-            rows={4}
           />
           <button
             type="button"
             className="voice-button"
             aria-label="Voice input"
           >
-            🎤 Voice
+            🎤  Voice
           </button>
         </div>
 
