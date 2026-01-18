@@ -31,12 +31,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Image
-          src="/logo.png"
-          alt="Personal Health Log Icon"
-          width={90}
-          height={90}
-        />
         {children}
       </body>
     </html>

@@ -10,9 +10,39 @@ export default function Home() {
   return (
     <main className="page">
       <header className="top-bar">
-        <ThemeToggle />
-        <a href="/auth/login">Log in</a>
-        <a href="/auth/logout">Log out</a>
+        <div className="brand">
+          <Image
+            src="/logo.png"
+            alt="Personal Health Log"
+            width={70}
+            height={70}
+          />
+        </div>
+
+        <div className="nav-right">
+          {/* show who is logged in */}
+          {!isLoading && user && (
+            <span className="user-pill">
+              Hi, {user.name || user.email}
+            </span>
+          )}
+
+          {/* show login only when logged out */}
+          {!isLoading && !user && (
+            <a href="/auth/login" className="auth-button login">
+              Log in
+            </a>
+          )}
+
+          {/* show logout only when logged in */}
+          {!isLoading && user && (
+            <a href="/auth/logout" className="auth-button logout">
+              Log out
+            </a>
+          )}
+
+          <ThemeToggle />
+        </div>
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
