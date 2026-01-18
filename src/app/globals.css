@@ -70,10 +70,23 @@
   --toggle-hover: #233044;
 }
 
+html {
+  height: 100%;
+  margin: 0;
+}
+
+main {
+  flex: 1;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .page {
@@ -195,4 +208,10 @@ textarea:focus {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
 }
