@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useVoiceInput } from "../../hooks/useVoiceInput";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);

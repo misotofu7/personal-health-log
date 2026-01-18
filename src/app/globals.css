@@ -93,15 +93,22 @@ body {
   text-align: center;
 }
 
+.logo-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
 .main-title {
-  margin-top: 100px;
+  margin-top: 90px;
   font-weight: 700;
-  font-size: 5vw;
+  font-size: 4vw;
   color: var(--foreground);
 }
 
 .muted {
   color: var(--foreground);
+  margin-top: 4px;
 }
 
 .textarea-wrapper {
@@ -110,8 +117,8 @@ body {
   max-width: 75%;
   margin: 24px auto;
 
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 160px;
 }
 
 .textarea-wrapper textarea {
@@ -120,10 +127,10 @@ body {
 }
 
 textarea {
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 160px;
 
-  padding: 14px 120px 56px 14px;
+  padding: 12px 110px 44px 12px;
   background-color: var(--textbox);
   font-size: 16px;
 
@@ -213,5 +220,55 @@ textarea:focus {
 .footer {
   display: flex;
   justify-content: center;
-  padding: 24px 0;
+  padding: 12px 0;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* AI Response box */
+.response-box {
+  max-width: 75%;
+  margin: 24px auto;
+  padding: 16px 20px;
+  background: var(--textbox);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.response-box p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Navigation links */
+.nav-links {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.nav-links a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.nav-links a:hover {
+  background: var(--accent-light);
+}
+
+/* Disclaimer */
+.disclaimer {
+  max-width: 500px;
+  margin: 24px auto 16px;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--foreground);
+  opacity: 0.4;
+  text-align: center;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useVoiceInput } from "../../hooks/useVoiceInput";
 
 export default function VoiceTestPage() {
   const {
