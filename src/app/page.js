@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "../hooks/useVoiceInput";
+import { useUser } from "@auth0/nextjs-auth0";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user, isLoading } = useUser();
 
   const {
     transcript,
@@ -26,9 +28,9 @@ export default function Home() {
   }, [transcript]);
 
   const handleSave = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isSaving) return;
 
-    setIsLoading(true);
+    setIsSaving(true);
     setResponse("");
 
     try {
@@ -49,7 +51,7 @@ export default function Home() {
     } catch (error) {
       setResponse(`Error: ${error.message}`);
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -73,7 +75,30 @@ export default function Home() {
       </div>
       
       <header className="top-bar">
-        <ThemeToggle />
+        <div className="nav-right">
+          {/* show who is logged in */}
+          {!isLoading && user && (
+            <span className="user-pill">
+              Hi, {user.name || user.email}
+            </span>
+          )}
+
+          {/* show login only when logged out */}
+          {!isLoading && !user && (
+            <a href="/auth/login" className="auth-button login">
+              Log in
+            </a>
+          )}
+
+          {/* show logout only when logged in */}
+          {!isLoading && user && (
+            <a href="/auth/logout" className="auth-button logout">
+              Log out
+            </a>
+          )}
+
+          <ThemeToggle />
+        </div>
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
@@ -103,10 +128,10 @@ export default function Home() {
         <button 
           className="save-button" 
           onClick={handleSave}
-          disabled={isLoading || !input.trim()}
-          style={isLoading || !input.trim() ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+          disabled={isSaving || !input.trim()}
+          style={isSaving || !input.trim() ? { opacity: 0.5, cursor: "not-allowed" } : {}}
         >
-          {isLoading ? "Saving..." : "Save entry"}
+          {isSaving ? "Saving..." : "Save entry"}
         </button>
       </div>
 
