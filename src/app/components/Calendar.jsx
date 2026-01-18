@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getFromStorage, saveToStorage } from "../lib/storage";
+import { Square } from "lucide-react";
 
 import { ModalPopup } from "./ModalPopup";
 
@@ -135,13 +136,13 @@ export const Calendar = () => {
                 {formatDate(currDate) === key ? <div className="flex items-center justify-center rounded-full w-6 h-6 bg-red-500 text-white"> {day.getDate()} </div> : day.getDate()}
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-0">
                 {dayPosts.map((post) => ( // this could easily be fixed with a simple filter function based on certain symptoms & severity??
                   <div
                     key={post.id}
-                    className="bg-pink-200 text-blue-900 text-xs px-1 py-0.5 rounded"
+                    className=" inline-block"
                   >
-                    {post.phrase}
+                    <Square className = "bg-purple-500 text-purple-500 w-3 h-3 m-1 rounded"/>
                   </div>
                 ))}
               </div>

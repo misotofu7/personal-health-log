@@ -1,32 +1,63 @@
 'use client'
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Square, X } from "lucide-react";
 
-export const ModalPopup = ({isModal, selectedDate}) => {
-    
-    const [phrase, setPhrase] = useState("");
+export const ModalPopup = ({ isModal, selectedDate }) => {
+  const [logs, setLogs] = useState([]);
+  const [phrase, setPhrase] = useState("");
 
-  /* Add post */
-  function addPost() {
-    if (!phrase || !selectedDate) return;
+  useEffect(() => {
+    fetch("/api/logs")
+      .then(res => res.json())
+      .then(data => setLogs(data.logs || []));
+  }, []);
 
-    const newPost = {
-      id: crypto.randomUUID(),
-      date: selectedDate,
-      timestamp: Date.now(),
-      tags: [],
-      phrase,
-    };
+  // Group logs by date
+  const logsByDate = logs.reduce((acc, log) => {
+    const date = log.date;
+    acc[date] = (acc[date] || []).concat(log);
+    return acc;
+  }, {});
 
-    const updated = [...posts, newPost];
-    setPosts(updated);
-    saveToStorage("calendarPosts", updated);
+  // Optional: color intensity based on number of logs
+  const getColorClass = (count) => {
+    if (count >= 3) return "text-blue-800 bg-blue-800";
+    if (count === 2) return "text-blue-500 bg-blue-500";
+    if (count === 1) return "text-blue-200 bg-blue-200";
+    return "text-gray-100 bg-gray-100";
+  };
 
-    setPhrase("");
-    setSelectedDate(null);
-  }
+  const dayLogs = logsByDate[selectedDate] || [];
 
+  return (
+    <div className="p-4 border rounded-lg bg-white shadow-lg">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="font-bold">Logs for {selectedDate}</h2>
+        <button onClick={() => isModal(false)}>
+          <X />
+        </button>
+      </div>
+
+      {dayLogs.length === 0 ? (
+        <p>No logs for this day.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-2">
+          {dayLogs.map(log => (
+            <div
+              key={log.id || log._id}
+              className={`p-2 flex items-center gap-2 border rounded ${getColorClass(dayLogs.length)}`}
+            >
+              <Square className="w-4 h-4" />
+              <span>{log.phrase || log.symptom || "No description"}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  /*
     return (
     <>
        <div className = "backdrop" onClick = {(isModal)}></div>
@@ -66,4 +97,5 @@ export const ModalPopup = ({isModal, selectedDate}) => {
     </div>
     </>
     )
+    */
 }

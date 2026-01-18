@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "../hooks/useVoiceInput";
+import { Navbar } from "./components/Navbar";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -63,17 +64,10 @@ export default function Home() {
 
   return (
     <main className="page">
-      <div className="logo-container">
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={70}
-          height={70}
-        />
-      </div>
       
       <header className="top-bar">
         <ThemeToggle />
+        <Navbar/>
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
