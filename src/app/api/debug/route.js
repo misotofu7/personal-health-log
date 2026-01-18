@@ -1,4 +1,4 @@
-import { getLogsCollection } from "@/lib/mongodb";
+import { getLogsCollection } from "../../../lib/mongodb";
 
 // GET - Debug endpoint to see what's in the database
 export async function GET() {
