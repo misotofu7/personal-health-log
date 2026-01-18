@@ -1,18 +1,9 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from "react";
 import { Square, X } from "lucide-react";
+import { formatDate } from "./utils/date";
 
-export const ModalPopup = ({ isModal, selectedDate }) => {
-  const [logs, setLogs] = useState([]);
-  const [phrase, setPhrase] = useState("");
-
-  useEffect(() => {
-    fetch("/api/logs")
-      .then(res => res.json())
-      .then(data => setLogs(data.logs || []));
-  }, []);
-
+export const ModalPopup = ({ selectedDate, logs, closeModal }) => {
   // Group logs by date
   const logsByDate = logs.reduce((acc, log) => {
     const date = log.date;
@@ -20,42 +11,35 @@ export const ModalPopup = ({ isModal, selectedDate }) => {
     return acc;
   }, {});
 
-  // Optional: color intensity based on number of logs
-  const getColorClass = (count) => {
-    if (count >= 3) return "text-blue-800 bg-blue-800";
-    if (count === 2) return "text-blue-500 bg-blue-500";
-    if (count === 1) return "text-blue-200 bg-blue-200";
-    return "text-gray-100 bg-gray-100";
-  };
-
   const dayLogs = logsByDate[selectedDate] || [];
 
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-lg">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="font-bold">Logs for {selectedDate}</h2>
-        <button onClick={() => isModal(false)}>
-          <X />
-        </button>
-      </div>
-
-      {dayLogs.length === 0 ? (
-        <p>No logs for this day.</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-2">
-          {dayLogs.map(log => (
-            <div
-              key={log.id || log._id}
-              className={`p-2 flex items-center gap-2 border rounded ${getColorClass(dayLogs.length)}`}
-            >
-              <Square className="w-4 h-4" />
-              <span>{log.phrase || log.symptom || "No description"}</span>
-            </div>
-          ))}
+    <>
+    <div className="backdrop" onClick={(closeModal)}></div>
+      <div className="dialog bg-white p-4 m-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-bold text-lg">Logs for {selectedDate}</h2>
+            <X className = "h-6 w-6 text-primary hover:scale-120 transition-colors duration-300 justify-self-end" onClick = {(closeModal)}/> {" "}
         </div>
-      )}
-    </div>
+
+        {dayLogs.length === 0 ? (
+          <p>No logs for this day.</p>
+        ) : (
+          <div className="space-y-2">
+            {dayLogs.map(log => (
+              <div
+                key={log.id || log._id}
+                className="flex items-center gap-2 border p-2 rounded"
+              >
+                <h1 className="text-black">{log.symptom || "No description"}</h1>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      </>
   );
+};
 
   /*
     return (
@@ -98,4 +82,3 @@ export const ModalPopup = ({ isModal, selectedDate }) => {
     </>
     )
     */
-}

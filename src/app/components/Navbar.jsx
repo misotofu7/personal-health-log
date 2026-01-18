@@ -7,10 +7,10 @@ import { cn } from "../lib/utils";
 import { X, Menu } from "lucide-react"; // why do i need to manually import this stuff??
 
 const navItems = [
-    {name: "home.", href: "/"},
-    {name: "calendar", href: "/calendar"},
-    {name: "chat", href: "/chat"},
-    {name: "heatttt", href: "/heatcalendar"},
+    {name: "Home", href: "/"},
+    {name: "Live Chat", href: "/chat"},
+    {name: "Calendar", href: "/calendar"},
+    {name: "Heat", href: "/heatcalendar"},
 
 ]
 
@@ -34,7 +34,7 @@ export const Navbar = () => {
     return (
         <nav 
         className = {cn(
-        "fixed w-full z-40 transition-all duration-300 py-5"
+        "fixed w-full z-40 transition-all duration-300"
     )}
     > 
     <div className = "container flex items-center justify-between">
@@ -53,7 +53,7 @@ export const Navbar = () => {
         </a>
 
         { /* apparently desktop nav */}
-        <div className = "hidden md:flex space-x-8">
+        <div className = "hidden items-center md:flex space-x-8">
             {navItems.map((item, key) => (
                 <a key = {key} href={item.href} className="text-foreground/80 hover:text-blue-400 transition-colors duration-300">
                     {item.name}
