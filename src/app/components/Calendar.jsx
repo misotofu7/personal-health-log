@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Square } from "lucide-react";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 import { ModalPopup } from "./ModalPopup";
 import { formatDate, getDaysInMonth } from "./utils/date";
@@ -11,13 +12,36 @@ export const Calendar = () => {
   const [logs, setLogs] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [localUserId, setLocalUserId] = useState(null);
+  const { user } = useUser();
 
-  // Fetch logs from API
+  // Get localUserId from localStorage (only if not logged in)
   useEffect(() => {
-    fetch("/api/logs")
+    if (typeof window !== "undefined" && !user) {
+      const storedId = localStorage.getItem("localUserId");
+      if (storedId) {
+        setLocalUserId(storedId);
+      }
+    } else if (user) {
+      setLocalUserId(null);
+    }
+  }, [user]);
+
+  // Fetch logs from API with userId or localUserId
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (user?.sub) {
+      params.append("userId", user.sub);
+    } else if (localUserId) {
+      params.append("localUserId", localUserId);
+    } else {
+      return; // Wait for user/localUserId
+    }
+    
+    fetch(`/api/logs?${params.toString()}`)
       .then(res => res.json())
       .then(data => setLogs(data.logs || []));
-  }, []);
+  }, [user, localUserId]);
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();

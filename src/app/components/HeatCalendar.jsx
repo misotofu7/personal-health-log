@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Square } from "lucide-react";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 function formatDate(date) {
   return date.toISOString().split("T")[0];
@@ -33,12 +34,36 @@ const getHeatColor = (count) => {
 export const HeatCalendar = () => {
   const [logs, setLogs] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [localUserId, setLocalUserId] = useState(null);
+  const { user } = useUser();
 
+  // Get localUserId from localStorage (only if not logged in)
   useEffect(() => {
-    fetch("/api/logs")
+    if (typeof window !== "undefined" && !user) {
+      const storedId = localStorage.getItem("localUserId");
+      if (storedId) {
+        setLocalUserId(storedId);
+      }
+    } else if (user) {
+      setLocalUserId(null);
+    }
+  }, [user]);
+
+  // Fetch logs from API with userId or localUserId
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (user?.sub) {
+      params.append("userId", user.sub);
+    } else if (localUserId) {
+      params.append("localUserId", localUserId);
+    } else {
+      return; // Wait for user/localUserId
+    }
+    
+    fetch(`/api/logs?${params.toString()}`)
       .then(res => res.json())
       .then(data => setLogs(data.logs || []));
-  }, []);
+  }, [user, localUserId]);
 
   const logsByDate = logs.reduce((acc, log) => {
     acc[log.date] = (acc[log.date] || []).concat(log);

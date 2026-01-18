@@ -15,6 +15,25 @@ const navItems = [
 export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = null }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState('urgent'); // 'off', 'urgent', 'all'
+
+  // Load TTS setting from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ttsEnabled');
+      if (saved) {
+        setTtsEnabled(saved);
+      }
+    }
+  }, []);
+
+  const toggleTTS = () => {
+    const next = ttsEnabled === 'off' ? 'urgent' : ttsEnabled === 'urgent' ? 'all' : 'off';
+    setTtsEnabled(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ttsEnabled', next);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -29,7 +48,7 @@ export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = 
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.navContent}>
             <a href="/" className={styles.brand} aria-label="Home">
-                <Image src="/logo.png" alt="Logo" width={70} height={70} priority className="hover:scale-102 duration-200" />
+                        <Image src="/logo.png" alt="Logo" width={55} height={55} priority className="hover:scale-102 duration-200" />
                 <h1 className = "font-bold text-2xl hover:scale-102 duration-200"> Pulsify </h1>
             </a>
 
@@ -42,19 +61,33 @@ export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = 
                     ))}
                 </div>
 
-                {!isLoading && !user && (
-                    <a href="/auth/login" className={`${styles.authButton} ${styles.login}`}>
+                {/* Only show login/logout when we know the actual state */}
+                {isLoading ? null : !user ? (
+                    <a href="/api/auth/login" className={`${styles.authButton} ${styles.login}`}>
                     Log in
                     </a>
-                )}
-
-                {!isLoading && user && (
-                    <a href="/auth/logout" className={`${styles.authButton} ${styles.logout}`}>
+                ) : (
+                    <a href="/api/auth/logout" className={`${styles.authButton} ${styles.logout}`}>
                     Log out
                     </a>
                 )}
 
                 <ThemeToggle />
+
+                {/* TTS Toggle */}
+                <button
+                  onClick={toggleTTS}
+                  className={styles.authButton}
+                  title={`TTS: ${ttsEnabled === 'off' ? 'Off' : ttsEnabled === 'urgent' ? 'Urgent Only' : 'All Responses'}`}
+                  style={{
+                    padding: '6px 10px',
+                    fontSize: '12px',
+                    minWidth: 'auto',
+                    marginRight: '8px'
+                  }}
+                >
+                  🔊 {ttsEnabled === 'off' ? 'Off' : ttsEnabled === 'urgent' ? 'Urgent' : 'All'}
+                </button>
 
           
                 {ThemeToggleComponent

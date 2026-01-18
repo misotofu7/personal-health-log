@@ -4,12 +4,28 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useVoiceInput } from "../../hooks/useVoiceInput";
 import { Navbar } from "../components/Navbar";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { playAudioResponse } from "../../lib/tts";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const { user, isLoading: userLoading } = useUser();
+  const [localUserId, setLocalUserId] = useState(null);
+
+  // Get localUserId for anonymous users
+  useEffect(() => {
+    if (typeof window !== "undefined" && !user) {
+      const storedId = localStorage.getItem("localUserId");
+      if (storedId) {
+        setLocalUserId(storedId);
+      }
+    } else if (user) {
+      setLocalUserId(null);
+    }
+  }, [user]);
 
   const {
     transcript,
@@ -46,6 +62,8 @@ export default function ChatPage() {
         body: JSON.stringify({
           message: userMessage,
           conversationHistory: messages.slice(-10), // Last 10 messages for context
+          userId: user?.sub || null,
+          localUserId: user ? null : localUserId,
         }),
       });
 
@@ -56,6 +74,8 @@ export default function ChatPage() {
           ...prev,
           { role: "assistant", content: data.response },
         ]);
+        // Play audio response
+        playAudioResponse(data.response);
       } else {
         setMessages((prev) => [
           ...prev,
@@ -81,7 +101,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <Navbar/>
+      <Navbar user={user} isLoading={userLoading} />
       {/* Header */}
       <header className="px-6 py-3 flex items-center gap-4" style={{ background: "var(--textbox)", borderBottom: "1px solid var(--border)" }}>
         <a 
@@ -110,9 +130,11 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ background: "var(--background)" }}>
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-4xl mb-4">🩺</div>
+            <div className="mb-4 flex justify-center">
+              <div className="text-5xl">💬</div>
+            </div>
             <h2 className="text-lg font-medium mb-2" style={{ color: "var(--foreground)" }}>
-              Welcome to BioLog
+              Welcome!
             </h2>
             <p className="max-w-md mx-auto mb-6" style={{ color: "var(--foreground)", opacity: 0.7 }}>
               I can help you track symptoms and find patterns in your health data.
@@ -156,11 +178,13 @@ export default function ChatPage() {
               }`}
               style={{
                 background: msg.role === "user" 
-                  ? "var(--accent)" 
+                  ? (typeof window !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark' 
+                      ? "#2563eb" // Blue in dark mode (white accent is invisible)
+                      : "var(--accent)")
                   : "var(--textbox)",
                 border: msg.role === "assistant" ? "1px solid var(--border)" : "none",
                 color: msg.role === "user" 
-                  ? "white" 
+                  ? "#ffffff" 
                   : "var(--foreground)"
               }}
             >

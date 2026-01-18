@@ -19,15 +19,17 @@ export async function GET() {
   }
 }
 
-// DELETE - Clear all logs (for testing)
+// DELETE - Clear all logs without userId (old anonymous data)
 export async function DELETE() {
   try {
     const collection = await getLogsCollection();
-    const result = await collection.deleteMany({});
+    // Delete all logs that don't have a userId (old anonymous data)
+    const result = await collection.deleteMany({ userId: { $exists: false } });
     
     return Response.json({ 
       success: true, 
-      deleted: result.deletedCount 
+      deleted: result.deletedCount,
+      message: `Deleted ${result.deletedCount} anonymous logs`
     });
   } catch (error) {
     return Response.json({ 

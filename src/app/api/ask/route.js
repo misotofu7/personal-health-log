@@ -1,5 +1,6 @@
 import { getLogsCollection } from "../../../lib/mongodb";
 import { v4 as uuidv4 } from "uuid";
+import { checkCommunityTrends } from "../../../services/publicData";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const MODEL = "google/gemini-3-flash-preview"; // OpenRouter model ID - Latest Gemini 3
@@ -76,14 +77,55 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "check_community_trends",
+      description: "Check public community health trends from Reddit (UCSC/Santa Cruz). Use this when users ask about local health alerts, weather-related symptoms, wildfires, air quality, or community health issues. This helps provide context about environmental factors that might affect their symptoms.",
+      parameters: {
+        type: "object",
+        properties: {
+          keyword: {
+            type: "string",
+            description: "Search keyword (e.g., 'heat', 'fire', 'air quality', 'covid', 'flu', 'smoke', 'wildfire', 'heatwave')",
+          },
+        },
+        required: ["keyword"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "log_weight",
+      description: "Log weight for CHF (Congestive Heart Failure) monitoring. Use this when users mention their weight (e.g., 'Scale says 153', 'I weigh 153 lbs', '153'). This tool automatically compares to previous weight and triggers alerts if weight gain >= 3 lbs.",
+      parameters: {
+        type: "object",
+        properties: {
+          weight: {
+            type: "number",
+            description: "Current weight in pounds (e.g., 153)",
+          },
+          condition: {
+            type: "string",
+            description: "Medical condition if applicable (e.g., 'CHF', 'Heart Failure'). Default is empty.",
+          },
+        },
+        required: ["weight"],
+      },
+    },
+  },
 ];
 
 // Execute tool calls
-async function executeTool(toolName, args) {
+async function executeTool(toolName, args, userId) {
   const collection = await getLogsCollection();
 
   switch (toolName) {
     case "save_symptom_log": {
+      if (!userId) {
+        return { error: "User ID required" };
+      }
       // Use local date, adjusted for days_ago if specified
       const now = new Date();
       const daysAgo = args.days_ago || 0;
@@ -92,6 +134,7 @@ async function executeTool(toolName, args) {
       const localDate = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
       const log = {
         id: uuidv4(),
+        userId, // Add user ID
         date: localDate,
         timestamp: targetDate.toISOString(),
         count: args.severity || 2,
@@ -116,11 +159,15 @@ async function executeTool(toolName, args) {
     }
 
     case "query_logs": {
+      if (!userId) {
+        return { success: true, logs: [] }; // Return empty if not logged in
+      }
       const daysBack = args.days_back || 30;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysBack);
 
       const query = {
+        userId, // Filter by user
         createdAt: { $gte: startDate },
       };
       if (args.symptom_filter) {
@@ -157,8 +204,11 @@ async function executeTool(toolName, args) {
     }
 
     case "analyze_patterns": {
+      if (!userId) {
+        return { success: true, analysis: "Please log in to see your health patterns." };
+      }
       const logs = await collection
-        .find({})
+        .find({ userId }) // Filter by user
         .sort({ timestamp: -1 })
         .limit(200)
         .toArray();
@@ -213,6 +263,283 @@ async function executeTool(toolName, args) {
       };
     }
 
+    case "log_weight": {
+      const weight = args.weight;
+      const condition = args.condition || "";
+      
+      if (!weight || weight <= 0) {
+        return { error: "Valid weight required" };
+      }
+
+      if (!userId) {
+        return { error: "User ID required" };
+      }
+
+      // Query previous weight logs
+      const daysBack = 30;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+
+      const query = {
+        userId,
+        createdAt: { $gte: startDate },
+        $or: [
+          { symptom: { $regex: /weight|fluid/i } },
+          { tags: { $in: ["weight", "chf", "fluid-retention"] } },
+          { weight: { $exists: true } }
+        ]
+      };
+
+      const previousLogs = await collection
+        .find(query)
+        .sort({ timestamp: -1 })
+        .limit(10)
+        .toArray();
+
+      // Extract previous weight from logs (check weight field first, then parse from text)
+      let previousWeight = null;
+      for (const log of previousLogs) {
+        // Check if log has weight field (from previous log_weight calls)
+        if (log.weight) {
+          previousWeight = log.weight;
+          break;
+        }
+        // Otherwise try to extract from symptom or raw_text
+        const weightMatch = log.symptom?.match(/(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?|kg)/i) || 
+                           log.raw_text?.match(/(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?|kg)/i);
+        if (weightMatch) {
+          previousWeight = parseFloat(weightMatch[1]);
+          break;
+        }
+      }
+
+      // Calculate weight change
+      const weightChange = previousWeight ? weight - previousWeight : 0;
+      const weightGain = weightChange > 0 ? weightChange : 0;
+
+      // Determine severity and action based on weight gain
+      let severity = 1;
+      let actionRequired = null;
+      let alertMessage = null;
+
+      if (weightGain >= 3) {
+        severity = 4;
+        actionRequired = "TAKE_LASIX";
+        alertMessage = `⚠️ PROTOCOL ACTIVATED: Weight gain of ${weightGain.toFixed(1)} lbs detected. Action required: ${actionRequired}`;
+      } else if (weightGain >= 2) {
+        severity = 3;
+        actionRequired = "MONITOR_CLOSELY";
+        alertMessage = `Weight gain of ${weightGain.toFixed(1)} lbs. Monitor closely.`;
+      } else if (weightGain >= 1) {
+        severity = 2;
+        alertMessage = `Weight gain of ${weightGain.toFixed(1)} lbs. Continue monitoring.`;
+      }
+
+      // Log the weight
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const log = {
+        id: uuidv4(),
+        userId,
+        date: localDate,
+        timestamp: now.toISOString(),
+        count: severity,
+        level: severity,
+        symptom: condition ? `Weight (${condition})` : "Weight",
+        raw_text: `Weight: ${weight} lbs${previousWeight ? ` (previous: ${previousWeight} lbs)` : ''}`,
+        tags: ["weight", condition.toLowerCase()].filter(Boolean),
+        weight: weight,
+        previousWeight: previousWeight,
+        weightChange: weightChange,
+        actionRequired: actionRequired,
+        createdAt: now,
+      };
+
+      await collection.insertOne(log);
+
+      return {
+        success: true,
+        weight: weight,
+        previousWeight: previousWeight,
+        weightChange: weightChange,
+        weightGain: weightGain,
+        severity: severity,
+        actionRequired: actionRequired,
+        alertMessage: alertMessage,
+        log: log
+      };
+    }
+
+    case "log_weight": {
+      const weight = args.weight;
+      const condition = args.condition || "";
+      
+      if (!weight || weight <= 0) {
+        return { error: "Valid weight required" };
+      }
+
+      if (!userId) {
+        return { error: "User ID required" };
+      }
+
+      // Query previous weight logs
+      const daysBack = 30;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+
+      const query = {
+        userId,
+        createdAt: { $gte: startDate },
+        $or: [
+          { symptom: { $regex: /weight|fluid/i } },
+          { tags: { $in: ["weight", "chf", "fluid-retention"] } },
+          { weight: { $exists: true } }
+        ]
+      };
+
+      const previousLogs = await collection
+        .find(query)
+        .sort({ timestamp: -1 })
+        .limit(10)
+        .toArray();
+
+      // Extract previous weight from logs (look for weight in symptom name, tags, or weight field)
+      let previousWeight = null;
+      for (const log of previousLogs) {
+        // Check if log has weight field
+        if (log.weight) {
+          previousWeight = log.weight;
+          break;
+        }
+        // Otherwise try to extract from symptom or raw_text
+        const weightMatch = log.symptom?.match(/(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?|kg)/i) || 
+                           log.raw_text?.match(/(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?|kg)/i);
+        if (weightMatch) {
+          previousWeight = parseFloat(weightMatch[1]);
+          break;
+        }
+      }
+
+      // Calculate weight change
+      const weightChange = previousWeight ? weight - previousWeight : 0;
+      const weightGain = weightChange > 0 ? weightChange : 0;
+
+      // Determine severity and action based on weight gain (CHF protocol)
+      let severity = 1;
+      let actionRequired = null;
+      let alertMessage = null;
+
+      if (weightGain >= 3) {
+        severity = 4;
+        actionRequired = "TAKE_LASIX";
+        alertMessage = `⚠️ PROTOCOL ACTIVATED: Weight gain of ${weightGain.toFixed(1)} lbs detected. Action required: ${actionRequired}`;
+      } else if (weightGain >= 2) {
+        severity = 3;
+        actionRequired = "MONITOR_CLOSELY";
+        alertMessage = `Weight gain of ${weightGain.toFixed(1)} lbs. Monitor closely.`;
+      } else if (weightGain >= 1) {
+        severity = 2;
+        alertMessage = `Weight gain of ${weightGain.toFixed(1)} lbs. Continue monitoring.`;
+      }
+
+      // Log the weight
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const log = {
+        id: uuidv4(),
+        userId,
+        date: localDate,
+        timestamp: now.toISOString(),
+        count: severity,
+        level: severity,
+        symptom: condition ? `Weight (${condition})` : "Weight",
+        raw_text: `Weight: ${weight} lbs${previousWeight ? ` (previous: ${previousWeight} lbs)` : ''}`,
+        tags: ["weight", condition.toLowerCase()].filter(Boolean),
+        weight: weight,
+        previousWeight: previousWeight,
+        weightChange: weightChange,
+        actionRequired: actionRequired,
+        createdAt: now,
+      };
+
+      await collection.insertOne(log);
+
+      return {
+        success: true,
+        weight: weight,
+        previousWeight: previousWeight,
+        weightChange: weightChange,
+        weightGain: weightGain,
+        severity: severity,
+        actionRequired: actionRequired,
+        alertMessage: alertMessage,
+        log: log
+      };
+    }
+
+    case "check_community_trends": {
+      const keyword = args.keyword || "";
+      if (!keyword) {
+        return { error: "Keyword required" };
+      }
+      
+      // Use real Reddit data (demoMode = false by default)
+      // Only falls back to demo if Reddit is down
+      const result = await checkCommunityTrends(keyword, false);
+      
+      // Check if it's demo data (demo URLs contain '/demo')
+      const isDemoData = result.url?.includes('/demo');
+      
+      // Log what we found for debugging
+      console.log(`[Community Trends] Keyword: "${keyword}", Found: ${result.found}, Source: ${result.source}, IsDemo: ${isDemoData}, URL: ${result.url}`);
+      
+      // CRITICAL: Don't return demo data - we don't want to show fake alerts
+      if (isDemoData) {
+        console.log(`[Community Trends] Skipping demo data for "${keyword}" - no real alerts found`);
+        return {
+          success: true,
+          found: false,
+          isDemo: true,
+          message: `No current community alerts found for "${keyword}"`
+        };
+      }
+      
+      // Only return if it's a recent, relevant alert AND real data
+      if (result.found && result.headline) {
+        // Check if the headline is actually relevant (not a lecture, event, etc.)
+        const headline = result.headline.toLowerCase();
+        const isRelevant = !headline.includes('lecture') && 
+                          !headline.includes('seminar') && 
+                          !headline.includes('event') &&
+                          !headline.includes('december') &&
+                          !headline.includes('november') &&
+                          !headline.includes('october');
+        
+        if (isRelevant) {
+          return {
+            success: true,
+            found: true,
+            source: result.source,
+            headline: result.headline,
+            url: result.url,
+            context: result.context,
+            timestamp: result.timestamp,
+            isDemo: false,
+            message: `Found current community alert: "${result.headline}" from ${result.source}`
+          };
+        }
+      }
+      
+      // No relevant alerts found
+      return {
+        success: true,
+        found: false,
+        message: `No current community alerts found for "${keyword}"`
+      };
+    }
+
     default:
       return { error: "Unknown tool" };
   }
@@ -247,10 +574,20 @@ async function callOpenRouter(messages, includeTools = true) {
 
 const SYSTEM_PROMPT = `You are a helpful health tracking assistant for people with chronic conditions.
 
+CRITICAL: You MUST respond ONLY in English. Never use any other language.
+
 Your capabilities:
 1. LOG symptoms when users describe how they feel (use save_symptom_log tool)
 2. QUERY their symptom history (use query_logs tool)
 3. ANALYZE patterns in their data (use analyze_patterns tool)
+4. CHECK community health trends from Reddit when users ask about local alerts, weather, fires, air quality, or environmental factors (use check_community_trends tool)
+
+IMPORTANT about community trends:
+- ONLY use check_community_trends for CURRENT, ACTIVE health alerts (heat advisories, wildfire warnings, air quality alerts, etc.)
+- DO NOT mention old events, lectures, seminars, research papers, or past dates
+- If the community alert is not recent (within last 7 days) or not relevant to current health conditions, DO NOT mention it
+- Only share community alerts if they are ACTIVE warnings that could affect the user's health RIGHT NOW
+- If no relevant current alerts are found, simply don't mention community trends - don't say "no alerts found"
 
 Guidelines:
 - Be empathetic and supportive
@@ -265,16 +602,51 @@ Guidelines:
   - "2 days ago" = days_ago: 2
   - "last week" = days_ago: 7
   - If no time mentioned, days_ago: 0 (today)
-- After logging, briefly confirm what you logged and offer to adjust if needed
+- After logging, briefly confirm what you logged in English only
 - When users ask about patterns/triggers, query and analyze their data
 - Give actionable insights based on their personal data
 - Keep responses SHORT and conversational (1-2 sentences max for confirmations)
+- ALWAYS respond in English. Never use Chinese, Spanish, or any other language.
 
-You are NOT a doctor. Don't diagnose. Focus on tracking and pattern recognition.`;
+You are NOT a doctor. Don't diagnose. Focus on tracking and pattern recognition.
+
+---
+
+SPECIAL PROTOCOL: Medical Guardian for CHF (Congestive Heart Failure) Patients
+
+ROLE: You are an active Medical Guardian for CHF patients. ALWAYS check for weight patterns when users mention weight.
+
+1. WEIGHT DETECTION:
+   - When users mention weight (e.g., "Scale says 153", "I weigh 153", "153 lbs", "weighed myself"), use the log_weight tool
+   - The tool automatically compares to previous weight and triggers alerts if needed
+   - If user mentions CHF, heart failure, or fluid retention, include condition: "CHF" in the tool call
+
+2. PROTOCOL CHECK (automatic via log_weight tool):
+   - If weight gain >= 3 lbs: Severity 4, action_required: "TAKE_LASIX"
+   - If weight gain 2-3 lbs: Severity 3, action_required: "MONITOR_CLOSELY"
+   - If weight gain 1-2 lbs: Severity 2, continue monitoring
+   - The tool returns alertMessage if protocol is activated
+
+3. RESPONSE FORMAT:
+   - If alertMessage is present, respond urgently with the alert
+   - Example: "⚠️ PROTOCOL ACTIVATED: Weight gain of 3.0 lbs detected. Action required: TAKE_LASIX"
+   - Always mention the weight change and previous weight for context
+
+4. EXTERNAL CONTEXT INTEGRATION:
+   - If check_community_trends returns data about "Heat", "Smoke", or "Pressure":
+     * Link it to CHF symptoms: "The heatwave in Santa Cruz may be worsening your fluid retention"
+     * Incorporate into severity assessment
+
+NOTE: Use log_weight tool for ALL weight mentions. The tool handles CHF protocol automatically.`;
 
 export async function POST(request) {
   try {
-    const { message, conversationHistory = [] } = await request.json();
+    // Frontend passes userId (Auth0) or localUserId (anonymous) in request body
+
+    const { message, conversationHistory = [], userId: frontendUserId = null, localUserId = null } = await request.json();
+    
+    // Use Auth0 userId from frontend if logged in, otherwise use localUserId from browser
+    const effectiveUserId = frontendUserId || localUserId || null;
 
     if (!message) {
       return Response.json(
@@ -306,7 +678,7 @@ export async function POST(request) {
       // Execute each tool
       for (const toolCall of toolCalls) {
         const args = JSON.parse(toolCall.function.arguments);
-        const toolResult = await executeTool(toolCall.function.name, args);
+        const toolResult = await executeTool(toolCall.function.name, args, effectiveUserId);
         toolResults.push({
           tool: toolCall.function.name,
           args,

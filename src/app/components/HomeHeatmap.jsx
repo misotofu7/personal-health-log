@@ -23,20 +23,29 @@ const getHeatColor = (maxSeverity) => {
   return "bg-red-500 border-red-600"; // severity 4
 };
 
-export const HomeHeatmap = ({ refreshTrigger }) => {
+export const HomeHeatmap = ({ refreshTrigger, userId = null, localUserId = null }) => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/logs")
+    // Build query params - include userId if logged in, or localUserId if anonymous
+    const params = new URLSearchParams();
+    if (userId) {
+      params.append("userId", userId);
+    } else if (localUserId) {
+      params.append("localUserId", localUserId);
+    }
+    const url = `/api/logs?${params.toString()}`;
+    
+    fetch(url)
       .then(res => res.json())
       .then(data => {
         setLogs(data.logs || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [refreshTrigger]);
+  }, [refreshTrigger, userId, localUserId]);
 
   const logsByDate = logs.reduce((acc, log) => {
     const date = log.date;
@@ -50,10 +59,11 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
 
   const days = getLast90Days();
   
-  // Group into weeks (7 days per column, going left to right)
-  const weeks = [];
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7));
+  // Group into rows - more horizontal (15 days per row)
+  const rows = [];
+  const daysPerRow = 15;
+  for (let i = 0; i < days.length; i += daysPerRow) {
+    rows.push(days.slice(i, i + daysPerRow));
   }
 
   if (loading) {
@@ -65,26 +75,21 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
   }
 
   return (
-    <div className="heatmap-container" style={{ margin: "24px auto", maxWidth: "800px", padding: "0 16px" }}>
-      <h3 style={{ 
-        fontSize: "14px", 
-        fontWeight: "600", 
-        marginBottom: "12px", 
-        color: "var(--foreground)",
-        textAlign: "center"
-      }}>
-        Your Last 90 Days
-      </h3>
+    <div className="heatmap-container" style={{ margin: "12px auto", maxWidth: "100%", padding: "0 16px", width: "100%" }}>
       <div style={{ 
         display: "flex", 
-        flexDirection: "row", 
+        flexDirection: "column", 
         gap: "3px",
-        justifyContent: "center",
-        alignItems: "flex-start"
+        alignItems: "center"
       }}>
-        {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-            {week.map((day) => {
+        {rows.map((row, rowIdx) => (
+          <div key={rowIdx} style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "3px",
+            justifyContent: "center"
+          }}>
+            {row.map((day) => {
               const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
               const dayData = logsByDate[dateKey];
               const maxSeverity = dayData?.maxSeverity || 0;
@@ -96,8 +101,8 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
                   key={dateKey}
                   className={colorClass}
                   style={{
-                    width: "11px",
-                    height: "11px",
+                    width: "12px",
+                    height: "12px",
                     borderRadius: "2px",
                     border: isToday ? "2px solid var(--accent)" : "1px solid transparent",
                     cursor: "pointer",

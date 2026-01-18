@@ -3,14 +3,36 @@
 import { useState, useEffect } from "react";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { Navbar } from "./components/Navbar";
+import { HomeHeatmap } from "./components/HomeHeatmap";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { playAudioResponse } from "../lib/tts";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [localUserId, setLocalUserId] = useState(null);
+  const { user, isLoading, error } = useUser();
+  
 
-  const { user, isLoading } = useUser();
+  // Generate localUserId for anonymous users (only if not logged in)
+  // This persists in localStorage, so anonymous logs remain visible after sign out
+  useEffect(() => {
+    if (typeof window !== "undefined" && !user) {
+      // Restore localUserId from localStorage (persists across login/logout)
+      let storedId = localStorage.getItem("localUserId");
+      if (!storedId) {
+        // Create new localUserId only if one doesn't exist
+        storedId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem("localUserId", storedId);
+      }
+      setLocalUserId(storedId);
+    } else if (user) {
+      // When logged in, clear localUserId from state (but keep in localStorage for when you sign out)
+      setLocalUserId(null);
+    }
+  }, [user]);
 
   const { transcript, isListening, startListening, stopListening, isSupported } =
     useVoiceInput();
@@ -29,7 +51,11 @@ export default function Home() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ 
+          message: input,
+          userId: user?.sub || null,
+          localUserId: user ? null : localUserId 
+        }),
       });
 
       const data = await res.json();
@@ -37,8 +63,10 @@ export default function Home() {
       if (data.success) {
         setResponse(data.response);
         setInput("");
-        // Trigger heatmap refresh
+        // Trigger heatmap and stats refresh
         setRefreshTrigger(prev => prev + 1);
+        // Play audio response
+        playAudioResponse(data.response);
       } else {
         setResponse(`Error: ${data.error}`);
       }
@@ -58,7 +86,7 @@ export default function Home() {
     <>
       <Navbar user={user} isLoading={isLoading} />
 
-      <main className="page" style={{ paddingTop: 90 }}>
+      <main className="page" style={{ paddingTop: 55 }}>
         <h1 className="main-title">Personal Health Log</h1>
         <p className="muted">The most efficient AI-powered tool for tracking symptoms & health.</p>
 
@@ -87,7 +115,11 @@ export default function Home() {
           className="save-button"
           onClick={handleSave}
           disabled={isSaving || !input.trim()}
-          style={isSaving || !input.trim() ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+          style={{
+            ...(isSaving || !input.trim() ? { opacity: 0.5, cursor: "not-allowed" } : {}),
+            padding: "8px 16px",
+            fontSize: "14px"
+          }}
         >
           {isSaving ? "Saving..." : "Save entry"}
         </button>
@@ -97,6 +129,20 @@ export default function Home() {
             <p>{response}</p>
           </div>
         )}
+
+        {/* Heatmap - horizontal and stretched */}
+        <div style={{ marginBottom: "8px" }}>
+          <p style={{ 
+            fontSize: "12px", 
+            color: "var(--foreground)", 
+            opacity: 0.6, 
+            margin: 0,
+            textAlign: "center"
+          }}>
+            Last 90 days
+          </p>
+        </div>
+        <HomeHeatmap refreshTrigger={refreshTrigger} userId={user?.sub || null} localUserId={user ? null : localUserId} />
 
         <div className="nav-links">
           <a href="/chat">💬 Chat with your data</a>

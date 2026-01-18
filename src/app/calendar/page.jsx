@@ -5,11 +5,13 @@ import { ViewToggle } from "../components/ViewToggle";
 import { Calendar } from "../components/Calendar";
 import { YearCalendar } from "../components/YearCalendar";
 import { Navbar } from "../components/Navbar";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 /* note that Date objects are built into javascript as pre-existing classes */
 
 export default function Home() {
     const [isYearView, setYearView] = useState(false);
+    const { user, isLoading } = useUser();
 
     useEffect(() => {
         const storedViewType = localStorage.getItem("viewType");
@@ -34,7 +36,7 @@ console.log("isYearView in Home:", isYearView);
 
   return <div className = "relative min-h-screen"> 
 
-  <Navbar/>
+  <Navbar user={user} isLoading={isLoading} />
     
         <main className = "mt-20">
             

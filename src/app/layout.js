@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-/*import { UserProvider } from "@auth0/nextjs-auth0/client";*/
+import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,7 +30,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Auth0Provider
+          baseUrl={process.env.NEXT_PUBLIC_AUTH0_BASE_URL || "http://localhost:3000"}
+          profileUrl="/api/auth/me"
+        >
+          {children}
+        </Auth0Provider>
       </body>
     </html>
   );
