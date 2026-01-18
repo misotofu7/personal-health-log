@@ -46,6 +46,13 @@ export function useVoiceInput() {
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
+        const confidence = result[0].confidence;
+        
+        // Only accept results with decent confidence (filter out noise)
+        if (confidence && confidence < 0.4) {
+          continue;
+        }
+        
         if (result.isFinal) {
           finalTranscript += result[0].transcript;
         } else {
@@ -54,7 +61,10 @@ export function useVoiceInput() {
       }
 
       // Show interim results while speaking, final when done
-      setTranscript(finalTranscript || interimTranscript);
+      // Only update if we got something meaningful
+      if (finalTranscript || interimTranscript) {
+        setTranscript(finalTranscript || interimTranscript);
+      }
     };
 
     recognition.onerror = (event) => {
