@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useVoiceInput } from "../hooks/useVoiceInput";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -41,7 +42,7 @@ export default function Home() {
 
       if (data.success) {
         setResponse(data.response);
-        setInput(""); // Clear input after successful save
+        setInput("");
       } else {
         setResponse(`Error: ${data.error}`);
       }
@@ -62,6 +63,15 @@ export default function Home() {
 
   return (
     <main className="page">
+      <div className="logo-container">
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          width={70}
+          height={70}
+        />
+      </div>
+      
       <header className="top-bar">
         <ThemeToggle />
       </header>
@@ -111,6 +121,13 @@ export default function Home() {
       <div className="nav-links">
         <a href="/chat">💬 Chat with your data</a>
       </div>
+
+      {/* Disclaimer */}
+      <p className="disclaimer">
+        This tool is for tracking only. It is not medical advice. Please consult a healthcare professional for diagnosis and treatment.
+      </p>
+
+      <footer className="footer">CruzHacks 2026</footer>
     </main>
   );
 }

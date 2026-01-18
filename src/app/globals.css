@@ -71,10 +71,23 @@
   --toggle-hover: #233044;
 }
 
+html {
+  height: 100%;
+  margin: 0;
+}
+
+main {
+  flex: 1;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* my needed styles */
@@ -101,15 +114,22 @@ body {
   text-align: center;
 }
 
+.logo-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
 .main-title {
-  margin-top: 100px;
+  margin-top: 90px;
   font-weight: 700;
-  font-size: 5vw;
+  font-size: 4vw;
   color: var(--foreground);
 }
 
 .muted {
   color: var(--foreground);
+  margin-top: 4px;
 }
 
 .textarea-wrapper {
@@ -118,8 +138,8 @@ body {
   max-width: 75%;
   margin: 24px auto;
 
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 160px;
 }
 
 .textarea-wrapper textarea {
@@ -128,10 +148,10 @@ body {
 }
 
 textarea {
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 160px;
 
-  padding: 14px 120px 56px 14px;
+  padding: 12px 110px 44px 12px;
   background-color: var(--textbox);
   font-size: 16px;
 
@@ -218,6 +238,14 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
 /* AI Response box */
 .response-box {
   max-width: 75%;
@@ -237,7 +265,7 @@ textarea:focus {
 
 /* Navigation links */
 .nav-links {
-  margin-top: 32px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 24px;
@@ -253,4 +281,15 @@ textarea:focus {
 
 .nav-links a:hover {
   background: var(--accent-light);
+}
+
+/* Disclaimer */
+.disclaimer {
+  max-width: 500px;
+  margin: 24px auto 16px;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--foreground);
+  opacity: 0.4;
+  text-align: center;
 }
