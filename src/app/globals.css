@@ -87,7 +87,7 @@ body {
 }
 
 .main-title {
-  margin-top: 16px;
+  margin-top: 80px;
   font-weight: 700;
   font-size: 5vw;
   color: var(--foreground);
@@ -95,16 +95,18 @@ body {
 
 .muted {
   color: var(--foreground);
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .textarea-wrapper {
   position: relative;
   width: 100%;
   max-width: 75%;
-  margin: 16px auto;
+  margin: 24px auto;
 
   min-height: 120px;
-  max-height: 200px;
+  max-height: 180px;
 }
 
 .textarea-wrapper textarea {
