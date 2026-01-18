@@ -381,3 +381,12 @@ textarea:focus {
 .calendar-nav-btn:hover {
   background: var(--accent-light);
 }
+
+.modal {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
