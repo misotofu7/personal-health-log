@@ -196,3 +196,40 @@ textarea:focus {
   justify-content: flex-end;
   margin-bottom: 16px;
 }
+
+/* AI Response box */
+.response-box {
+  max-width: 75%;
+  margin: 24px auto;
+  padding: 16px 20px;
+  background: var(--textbox);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.response-box p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Navigation links */
+.nav-links {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.nav-links a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.nav-links a:hover {
+  background: var(--accent-light);
+}

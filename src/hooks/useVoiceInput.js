@@ -48,8 +48,8 @@ export function useVoiceInput() {
         const result = event.results[i];
         const confidence = result[0].confidence;
         
-        // Only accept results with decent confidence (filter out noise)
-        if (confidence && confidence < 0.4) {
+        // Only filter out very low confidence results (noise)
+        if (confidence && confidence < 0.2) {
           continue;
         }
         
