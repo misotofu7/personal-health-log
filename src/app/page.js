@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 
@@ -66,6 +67,15 @@ export default function Home() {
         <ThemeToggle />
       </header>
 
+      <div className="logo-container">
+        <Image
+          src="/logo.png"
+          alt="Personal Health Log Icon"
+          width={90}
+          height={90}
+        />
+      </div>
+
       <h1 className="main-title">Personal Health Log</h1>
       <p className="muted">Log symptoms and view them on a calendar.</p>
 
@@ -111,6 +121,11 @@ export default function Home() {
       <div className="nav-links">
         <a href="/chat">💬 Chat with your data</a>
       </div>
+
+      {/* Disclaimer */}
+      <p className="disclaimer">
+        This tool is for tracking only. It is not medical advice. Please consult a healthcare professional for diagnosis and treatment.
+      </p>
     </main>
   );
 }

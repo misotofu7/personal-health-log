@@ -22,6 +22,10 @@ const tools = [
             type: "number",
             description: "Severity from 1-4. 1=mild, 2=moderate, 3=severe, 4=unbearable",
           },
+          days_ago: {
+            type: "number",
+            description: "How many days ago the symptom occurred. 0 = today, 1 = yesterday, 2 = two days ago, etc. Default is 0 (today).",
+          },
           tags: {
             type: "array",
             items: { type: "string" },
@@ -80,13 +84,16 @@ async function executeTool(toolName, args) {
 
   switch (toolName) {
     case "save_symptom_log": {
-      // Use local date (not UTC) so "today" is correct for user's timezone
+      // Use local date, adjusted for days_ago if specified
       const now = new Date();
-      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const daysAgo = args.days_ago || 0;
+      const targetDate = new Date(now);
+      targetDate.setDate(targetDate.getDate() - daysAgo);
+      const localDate = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
       const log = {
         id: uuidv4(),
         date: localDate,
-        timestamp: now.toISOString(),
+        timestamp: targetDate.toISOString(),
         count: args.severity || 2,
         level: args.severity || 2,
         symptom: args.symptom,
@@ -95,14 +102,15 @@ async function executeTool(toolName, args) {
         createdAt: new Date(),
       };
       await collection.insertOne(log);
-      const timeStr = now.toLocaleTimeString('en-US', { 
+      const timeStr = targetDate.toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit',
         hour12: true 
       });
+      const dateLabel = daysAgo === 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`;
       return { 
         success: true, 
-        message: `Logged: ${args.symptom} (severity ${args.severity}/4) at ${timeStr} on ${localDate}`, 
+        message: `Logged: ${args.symptom} (severity ${args.severity}/4) for ${dateLabel} (${localDate})`, 
         log 
       };
     }
@@ -248,6 +256,11 @@ Guidelines:
 - Be empathetic and supportive
 - When users describe symptoms, extract: symptom name, severity (1-4), and context tags
 - Severity guide: 1=mild/slight, 2=moderate/noticeable, 3=severe/bad, 4=unbearable/worst ever
+- IMPORTANT: If the user mentions a time reference (yesterday, 2 days ago, last week, etc.), set days_ago accordingly:
+  - "yesterday" = days_ago: 1
+  - "2 days ago" = days_ago: 2
+  - "last week" = days_ago: 7
+  - If no time mentioned, days_ago: 0 (today)
 - When users ask about patterns/triggers, query and analyze their data
 - Give actionable insights based on their personal data
 - Keep responses concise but helpful

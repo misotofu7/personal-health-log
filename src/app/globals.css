@@ -80,8 +80,14 @@ body {
   text-align: center;
 }
 
+.logo-container {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
 .main-title {
-  margin-top: 100px;
+  margin-top: 16px;
   font-weight: 700;
   font-size: 5vw;
   color: var(--foreground);
@@ -95,10 +101,10 @@ body {
   position: relative;
   width: 100%;
   max-width: 75%;
-  margin: 24px auto;
+  margin: 16px auto;
 
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 120px;
+  max-height: 200px;
 }
 
 .textarea-wrapper textarea {
@@ -107,10 +113,10 @@ body {
 }
 
 textarea {
-  min-height: 140px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 150px;
 
-  padding: 14px 120px 56px 14px;
+  padding: 12px 120px 48px 12px;
   background-color: var(--textbox);
   font-size: 16px;
 
@@ -216,7 +222,7 @@ textarea:focus {
 
 /* Navigation links */
 .nav-links {
-  margin-top: 32px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 24px;
@@ -232,4 +238,15 @@ textarea:focus {
 
 .nav-links a:hover {
   background: var(--accent-light);
+}
+
+/* Disclaimer */
+.disclaimer {
+  max-width: 500px;
+  margin: 24px auto 16px;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--foreground);
+  opacity: 0.4;
+  text-align: center;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 export default function ChatPage() {
@@ -80,13 +81,27 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
-        <h1 className="text-xl font-semibold text-slate-900">
-          BioLog Health Assistant
-        </h1>
-        <p className="text-sm text-slate-500">
-          Log symptoms, ask questions about your health patterns
-        </p>
+      <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+        <a 
+          href="/" 
+          className="hover:opacity-70 transition-opacity"
+          title="Back to Home"
+        >
+          <Image
+            src="/logo.png"
+            alt="Home"
+            width={40}
+            height={40}
+          />
+        </a>
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900">
+            Health Assistant
+          </h1>
+          <p className="text-xs text-slate-500">
+            Log symptoms, ask about patterns
+          </p>
+        </div>
       </header>
 
       {/* Messages */}
