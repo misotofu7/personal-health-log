@@ -6,11 +6,13 @@ import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { Navbar } from "./components/Navbar";
 import { useUser } from "@auth0/nextjs-auth0";
+import { HomeHeatmap } from "./components/HomeHeatmap";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { user, isLoading } = useUser();
 
   const {
@@ -46,6 +48,8 @@ export default function Home() {
       if (data.success) {
         setResponse(data.response);
         setInput("");
+        // Trigger heatmap refresh
+        setRefreshTrigger(prev => prev + 1);
       } else {
         setResponse(`Error: ${data.error}`);
       }
@@ -135,6 +139,9 @@ export default function Home() {
           <p>{response}</p>
         </div>
       )}
+
+      {/* Heatmap */}
+      <HomeHeatmap refreshTrigger={refreshTrigger} />
 
       {/* Navigation links */}
       <div className="nav-links">
