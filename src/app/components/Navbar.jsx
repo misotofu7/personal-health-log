@@ -1,98 +1,82 @@
-'use client'
+"use client";
 
+import styles from "./Navbar.module.css";
 import Image from "next/image";
-
 import { useEffect, useState } from "react";
-import { cn } from "../lib/utils";
-import { X, Menu } from "lucide-react"; // why do i need to manually import this stuff??
+import { X, Menu } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
-    {name: "Home", href: "/"},
-    {name: "Live Chat", href: "/chat"},
-    {name: "Calendar", href: "/calendar"},
-    {name: "Heat", href: "/heatcalendar"},
+  { name: "Live Chat", href: "/chat" },
+  { name: "Calendar", href: "/calendar" },
+  { name: "Heat", href: "/heatcalendar" },
+];
 
-]
+export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = null }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-export const Navbar = () => {
-    
-    
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
- 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.screenY > 10)
-        }
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-        window.addEventListener("scroll", handleScroll); 
-        return () => window.removeEventListener("scroll", handleScroll); 
-    
-    }, []);
-    
+  const closeMenu = () => setIsMenuOpen(false);
 
-    return (
-        <nav 
-        className = {cn(
-        "fixed w-full z-40 transition-all duration-300"
-    )}
-    > 
-    <div className = "container flex items-center justify-between">
-        <a href = "/" className = "text-xl font-bold text-primary flex items-center hover:scale-102 duration-200 hover:text-accent"> 
-        
-            <span className = "relative z-10 ml-3">
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={70}
-          height={70}
-        />
-       
-    
-            </span>
-         PULSIFY
-                
-                
-        </a>
+  return (
+    <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
+        <div className={styles.navContent}>
+            <a href="/" className={styles.brand} aria-label="Home">
+                <Image src="/logo.png" alt="Logo" width={70} height={70} priority />
+            </a>
 
-        { /* apparently desktop nav */}
-        <div className = "hidden items-center md:flex space-x-8">
-            {navItems.map((item, key) => (
-                <a key = {key} href={item.href} className="text-foreground/80 hover:text-blue-400 transition-colors duration-300">
-                    {item.name}
-                </a>
-            ))}
-        </div>
-        
-        
+            <div className={styles.navRight}>
+                <div className={styles.navLinks}>
+                    {navItems.map((item) => (
+                    <a key={item.href} href={item.href} className={styles.navLink}>
+                        {item.name}
+                    </a>
+                    ))}
+                </div>
 
-        { /* mobile nav */ } 
-        
-        <button 
-            onClick = {() => setIsMenuOpen((prev) => !prev)}
-            className="md:hidden p-2 text-foreground z-50 focus:text-primary"
-            aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
-            >
-            {isMenuOpen ? <X size = {24} /> : <Menu size = {24}/> }
-            </button>
-        
-        <div 
-        className = {cn(
-            "fixed inset-0 bg-background/50 backdrop-blur-md z-40 flex flex-col items-center justify-center",
-            "transition-all duration-300 md:hidden",
-            isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        >
-            <div className = "flex flex-col space-y-8 text-xl">
-                {navItems.map((item, key) => (
-                <a key = {key} href={item.href} className="text-blue-200 hover:text-blue-400 transition-colors duration-300" onClick = {() => setIsMenuOpen(false)}>
-                    {item.name}
-                </a>
-                ))}
+                {!isLoading && !user && (
+                    <a href="/auth/login" className={`${styles.authButton} ${styles.login}`}>
+                    Log in
+                    </a>
+                )}
+
+                {!isLoading && user && (
+                    <a href="/auth/logout" className={`${styles.authButton} ${styles.logout}`}>
+                    Log out
+                    </a>
+                )}
+
+                <ThemeToggle />
+
+                {!isLoading && !user && (
+                    <a href="/auth/login" className={`${styles.authButton} ${styles.login}`}>
+                    Log in
+                    </a>
+                )}
+
+                {ThemeToggleComponent
+                    ? typeof ThemeToggleComponent === "function"
+                    ? <ThemeToggleComponent />
+                    : ThemeToggleComponent
+                    : null}
+
+                <button
+                    type="button"
+                    onClick={() => setIsMenuOpen((p) => !p)}
+                    className={styles.menuButton}
+                    aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
+                >
+                    {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
             </div>
         </div>
-
-    </div>
     </nav>
-    );
-}
+  );
+};

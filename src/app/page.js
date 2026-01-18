@@ -1,33 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { Navbar } from "./components/Navbar";
-import { useUser } from "@auth0/nextjs-auth0";
-import { HomeHeatmap } from "./components/HomeHeatmap";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const { user, isLoading } = useUser();
 
-  const {
-    transcript,
-    isListening,
-    startListening,
-    stopListening,
-    isSupported,
-  } = useVoiceInput();
+  const { transcript, isListening, startListening, stopListening, isSupported } =
+    useVoiceInput();
 
-  // Update input when voice transcript changes
   useEffect(() => {
-    if (transcript) {
-      setInput(transcript);
-    }
+    if (transcript) setInput(transcript);
   }, [transcript]);
 
   const handleSave = async () => {
@@ -61,49 +50,18 @@ export default function Home() {
   };
 
   const handleVoiceClick = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+    if (isListening) stopListening();
+    else startListening();
   };
 
   return (
-    <main className="page">
-      
-      <header className="top-bar">
-        <div className="nav-right">
-          {/* show who is logged in */}
-          {!isLoading && user && (
-            <span className="user-pill">
-              Hi, {user.name || user.email}
-            </span>
-          )}
+    <>
+      <Navbar user={user} isLoading={isLoading} />
 
-          {/* show login only when logged out */}
-          {!isLoading && !user && (
-            <a href="/auth/login" className="auth-button login">
-              Log in
-            </a>
-          )}
+      <main className="page" style={{ paddingTop: 90 }}>
+        <h1 className="main-title">Personal Health Log</h1>
+        <p className="muted">Log symptoms and view them on a calendar.</p>
 
-          {/* show logout only when logged in */}
-          {!isLoading && user && (
-            <a href="/auth/logout" className="auth-button logout">
-              Log out
-            </a>
-          )}
-
-          <ThemeToggle />
-        </div>
-        <Navbar/>
-        
-      </header>
-
-      <h1 className="main-title">Personal Health Log</h1>
-      <p className="muted">The most <span className="text-glow text-blue-500"> efficient </span> AI-powered tool for logging & tracking <span className="text-glow text-blue-500">health-related </span>symptoms.</p>
-
-      <div>
         <div className="textarea-wrapper">
           <textarea
             id="symptoms"
@@ -111,6 +69,7 @@ export default function Home() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
+
           {isSupported && (
             <button
               type="button"
@@ -124,37 +83,32 @@ export default function Home() {
           )}
         </div>
 
-        <button 
-          className="save-button" 
+        <button
+          className="save-button"
           onClick={handleSave}
           disabled={isSaving || !input.trim()}
           style={isSaving || !input.trim() ? { opacity: 0.5, cursor: "not-allowed" } : {}}
         >
           {isSaving ? "Saving..." : "Save entry"}
         </button>
-      </div>
 
-      {/* AI Response */}
-      {response && (
-        <div className="response-box">
-          <p>{response}</p>
+        {response && (
+          <div className="response-box">
+            <p>{response}</p>
+          </div>
+        )}
+
+        <div className="nav-links">
+          <a href="/chat">💬 Chat with your data</a>
         </div>
-      )}
 
-      {/* Heatmap */}
-      <HomeHeatmap refreshTrigger={refreshTrigger} />
+        <p className="disclaimer">
+          This tool is for tracking only. It is not medical advice. Please consult a
+          healthcare professional for diagnosis and treatment.
+        </p>
 
-      {/* Navigation links */}
-      <div className="nav-links">
-        <a href="/chat">💬 Chat with your data</a>
-      </div>
-
-      {/* Disclaimer */}
-      <p className="disclaimer">
-        This tool is for tracking only. It is not medical advice. Please consult a healthcare professional for diagnosis and treatment.
-      </p>
-
-      <footer className="footer">CruzHacks 2026</footer>
-    </main>
+        <footer className="footer">CruzHacks 2026</footer>
+      </main>
+    </>
   );
 }
