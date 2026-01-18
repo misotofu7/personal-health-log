@@ -46,7 +46,7 @@ export const Calendar = () => {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-          className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+          className="calendar-nav-btn"
         >
           ← Prev
         </button>
@@ -55,7 +55,7 @@ export const Calendar = () => {
         </h1>
         <button
           onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+          className="calendar-nav-btn"
         >
           Next →
         </button>

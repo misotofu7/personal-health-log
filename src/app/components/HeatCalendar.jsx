@@ -62,7 +62,7 @@ export const HeatCalendar = () => {
     <div className="p-4 max-w-screen-lg mx-auto">
         <div className="font-bold text-3xl text-center">{year}</div>
         <h3 className="font-medium text-l text-center mb-5"> A look at your year in terms of symptoms & intensity. </h3>
-      <div className="border border-text-primary rounded-lg p-4 m-3 grid grid-cols-4 gap-4">
+      <div className="rounded-lg p-4 m-3 grid grid-cols-4 gap-4 heat-panel">
         {months.map(({ month, days }) => (
           <div key={month}>
             <div className="text-center font-semibold mb-1">

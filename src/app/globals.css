@@ -41,6 +41,8 @@
 
   --toggle-bg: #6a6a6a;
   --toggle-hover: #4b4b4b;
+
+  --panel: #c0c0c0;
 }
 
 :root[data-theme="dark"] {
@@ -61,6 +63,8 @@
 
   --toggle-bg: #182542;
   --toggle-hover: #233044;
+
+  --panel: #0f172a;
 }
 
 html {
@@ -82,6 +86,16 @@ body {
   flex-direction: column;
 }
 
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.heat-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
 /* my needed styles */
 
 .backdrop {
@@ -92,6 +106,7 @@ body {
   width: 100%;
   height: 100%;
 }
+
 .dialog {
   position: fixed;
   z-index: 10000; 
@@ -343,4 +358,17 @@ textarea:focus {
 
 :root[data-theme="dark"] .user-pill {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.calendar-nav-btn {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.calendar-nav-btn:hover {
+  background: var(--accent-light);
 }
