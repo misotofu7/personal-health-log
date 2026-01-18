@@ -38,7 +38,8 @@ export const Navbar = () => {
     )}
     > 
     <div className = "container flex items-center justify-between">
-        <a href = "/" className = "text-xl font-bold text-primary flex items-center"> 
+        <a href = "/" className = "text-xl font-bold text-primary flex items-center hover:scale-102 duration-200 hover:text-accent"> 
+        
             <span className = "relative z-10 ml-3">
         <Image
           src="/logo.png"
@@ -46,8 +47,10 @@ export const Navbar = () => {
           width={70}
           height={70}
         />
+       
     
             </span>
+         PULSIFY
                 
                 
         </a>

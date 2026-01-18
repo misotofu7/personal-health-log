@@ -97,10 +97,11 @@ export default function Home() {
           <ThemeToggle />
         </div>
         <Navbar/>
+        
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
-      <p className="muted">Log symptoms and view them on a calendar.</p>
+      <p className="muted">The most <span className="text-glow"> efficient </span> AI-powered tool for logging & tracking health-related symptoms.</p>
 
       <div>
         <div className="textarea-wrapper">

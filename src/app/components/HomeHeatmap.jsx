@@ -73,7 +73,7 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
         color: "var(--foreground)",
         textAlign: "center"
       }}>
-        Last 90 Days
+        Your Last 90 Days
       </h3>
       <div style={{ 
         display: "flex", 
@@ -112,13 +112,15 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
       </div>
       <div style={{ 
         display: "flex", 
-        justifyContent: "flex-end", 
+        justifyContent: "center", 
         gap: "8px", 
         marginTop: "8px",
         fontSize: "11px",
         color: "var(--foreground)",
         opacity: 0.6
+
       }}>
+        
         <span>Less</span>
         <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
           <div style={{ width: "11px", height: "11px", borderRadius: "2px", background: "var(--gray-100)", border: "1px solid var(--gray-200)" }} />
@@ -127,6 +129,7 @@ export const HomeHeatmap = ({ refreshTrigger }) => {
           <div style={{ width: "11px", height: "11px", borderRadius: "2px", background: "#ef4444", border: "1px solid #dc2626" }} />
         </div>
         <span>More</span>
+
       </div>
     </div>
   );
