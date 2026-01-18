@@ -60,7 +60,7 @@ export default function Home() {
 
       <main className="page" style={{ paddingTop: 90 }}>
         <h1 className="main-title">Personal Health Log</h1>
-        <p className="muted">Log symptoms and view them on a calendar.</p>
+        <p className="muted">The most efficient AI-powered tool for tracking symptoms & health.</p>
 
         <div className="textarea-wrapper">
           <textarea

@@ -29,7 +29,8 @@ export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = 
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.navContent}>
             <a href="/" className={styles.brand} aria-label="Home">
-                <Image src="/logo.png" alt="Logo" width={70} height={70} priority />
+                <Image src="/logo.png" alt="Logo" width={70} height={70} priority className="hover:scale-102 duration-200" />
+                <h1 className = "font-bold text-2xl hover:scale-102 duration-200"> Pulsify </h1>
             </a>
 
             <div className={styles.navRight}>
@@ -55,12 +56,7 @@ export const Navbar = ({ user = null, isLoading = false, ThemeToggleComponent = 
 
                 <ThemeToggle />
 
-                {!isLoading && !user && (
-                    <a href="/auth/login" className={`${styles.authButton} ${styles.login}`}>
-                    Log in
-                    </a>
-                )}
-
+          
                 {ThemeToggleComponent
                     ? typeof ThemeToggleComponent === "function"
                     ? <ThemeToggleComponent />
