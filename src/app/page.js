@@ -101,7 +101,7 @@ export default function Home() {
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>
-      <p className="muted">The most <span className="text-glow"> efficient </span> AI-powered tool for logging & tracking health-related symptoms.</p>
+      <p className="muted">The most <span className="text-glow text-blue-500"> efficient </span> AI-powered tool for logging & tracking <span className="text-glow text-blue-500">health-related </span>symptoms.</p>
 
       <div>
         <div className="textarea-wrapper">
