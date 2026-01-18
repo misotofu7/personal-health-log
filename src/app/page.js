@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
 import { useVoiceInput } from "../hooks/useVoiceInput";
+import { Navbar } from "./components/Navbar";
 import { useUser } from "@auth0/nextjs-auth0";
 
 export default function Home() {
@@ -65,14 +66,6 @@ export default function Home() {
 
   return (
     <main className="page">
-      <div className="logo-container">
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={70}
-          height={70}
-        />
-      </div>
       
       <header className="top-bar">
         <div className="nav-right">
@@ -99,6 +92,7 @@ export default function Home() {
 
           <ThemeToggle />
         </div>
+        <Navbar/>
       </header>
 
       <h1 className="main-title">Personal Health Log</h1>

@@ -1,38 +1,54 @@
-'use client'
+'use client';
 
-import { useState } from "react";
+import { Square, X } from "lucide-react";
+import { formatDate } from "./utils/date";
 
-export const ModalPopup = ({isModal}) => {
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [phrase, setPhrase] = useState("");
+export const ModalPopup = ({ selectedDate, logs, closeModal }) => {
+  // Group logs by date
+  const logsByDate = logs.reduce((acc, log) => {
+    const date = log.date;
+    acc[date] = (acc[date] || []).concat(log);
+    return acc;
+  }, {});
 
-  /* Add post */
-  function addPost() {
-    if (!phrase || !selectedDate) return;
+  const dayLogs = logsByDate[selectedDate] || [];
 
-    const newPost = {
-      id: crypto.randomUUID(),
-      date: selectedDate,
-      timestamp: Date.now(),
-      tags: [],
-      phrase,
-    };
+  return (
+    <>
+    <div className="backdrop" onClick={(closeModal)}></div>
+      <div className="dialog bg-white p-4 m-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-bold text-lg">Logs for {selectedDate}</h2>
+            <X className = "h-6 w-6 text-primary hover:scale-120 transition-colors duration-300 justify-self-end" onClick = {(closeModal)}/> {" "}
+        </div>
 
-    const updated = [...posts, newPost];
-    setPosts(updated);
-    saveToStorage("calendarPosts", updated);
+        {dayLogs.length === 0 ? (
+          <p>No logs for this day.</p>
+        ) : (
+          <div className="space-y-2">
+            {dayLogs.map(log => (
+              <div
+                key={log.id || log._id}
+                className="flex items-center gap-2 border p-2 rounded"
+              >
+                <h1 className="text-black">{log.symptom || "No description"}</h1>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      </>
+  );
+};
 
-    setPhrase("");
-    setSelectedDate(null);
-  }
-
+  /*
     return (
     <>
        <div className = "backdrop" onClick = {(isModal)}></div>
        <div className = "dialog">
         <div className = "bg-blue-300 p-8 rounded-lg shadow-xs border border-black max-w-xl">
    <div className = "p-3 rounded-full bg-blue-400 inline-block hover:bg-blue-500 transition-colors duration-1000">
-    <button className = "h-6 w-6 text-blue-300 transition-colors duration-300" onClick = {(isModal)}> close modal </button>
+    <X className = "h-6 w-6 text-blue-300 transition-colors duration-300" onClick = {(isModal)}/> {' '}
     </div>
 
         <div className="mt-6 p-4 border rounded bg-gray-50">
@@ -65,4 +81,4 @@ export const ModalPopup = ({isModal}) => {
     </div>
     </>
     )
-}
+    */

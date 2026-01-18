@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useVoiceInput } from "../../hooks/useVoiceInput";
+import { Navbar } from "../components/Navbar";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -80,6 +81,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar/>
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
         <a 
