@@ -70,24 +70,31 @@
   --toggle-hover: #233044;
 }
 
+html {
+  height: 100%;
+  margin: 0;
+}
+
+main {
+  flex: 1;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .page {
   text-align: center;
 }
 
-.logo-container {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-}
-
 .main-title {
-  margin-top: 80px;
+  margin-top: 100px;
   font-weight: 700;
   font-size: 5vw;
   color: var(--foreground);
@@ -95,8 +102,6 @@ body {
 
 .muted {
   color: var(--foreground);
-  margin-top: 8px;
-  margin-bottom: 8px;
 }
 
 .textarea-wrapper {
@@ -105,8 +110,8 @@ body {
   max-width: 75%;
   margin: 24px auto;
 
-  min-height: 120px;
-  max-height: 180px;
+  min-height: 140px;
+  max-height: 300px;
 }
 
 .textarea-wrapper textarea {
@@ -115,10 +120,10 @@ body {
 }
 
 textarea {
-  min-height: 100px;
-  max-height: 150px;
+  min-height: 140px;
+  max-height: 300px;
 
-  padding: 12px 120px 48px 12px;
+  padding: 14px 120px 56px 14px;
   background-color: var(--textbox);
   font-size: 16px;
 
@@ -205,50 +210,8 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
-/* AI Response box */
-.response-box {
-  max-width: 75%;
-  margin: 24px auto;
-  padding: 16px 20px;
-  background: var(--textbox);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  text-align: left;
-  line-height: 1.6;
-}
-
-.response-box p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-/* Navigation links */
-.nav-links {
-  margin-top: 20px;
+.footer {
   display: flex;
   justify-content: center;
-  gap: 24px;
-}
-
-.nav-links a {
-  color: var(--accent);
-  text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-}
-
-.nav-links a:hover {
-  background: var(--accent-light);
-}
-
-/* Disclaimer */
-.disclaimer {
-  max-width: 500px;
-  margin: 24px auto 16px;
-  padding: 0 16px;
-  font-size: 11px;
-  color: var(--foreground);
-  opacity: 0.4;
-  text-align: center;
+  padding: 24px 0;
 }
