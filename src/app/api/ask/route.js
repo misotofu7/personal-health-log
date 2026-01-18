@@ -1,4 +1,4 @@
-import { getLogsCollection } from "@/lib/mongodb";
+import { getLogsCollection } from "../../../lib/mongodb";
 import { v4 as uuidv4 } from "uuid";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
