@@ -104,8 +104,8 @@ export const Calendar = () => {
           return (
             <div
               key={key}
-              className={`p-1 border min-h-[80px] cursor-pointer rounded
-                ${selectedDate === key ? "ring-2 ring-purple-500" : ""}`}
+              className={`p-1 border min-h-[80px] cursor-pointer rounded hover:bg-blue-100
+                ${selectedDate === key ? "ring-purple-500" : ""}`}
               onClick={() => {
                 setSelectedDate(key);
                 setModalOpen(true);

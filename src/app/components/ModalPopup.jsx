@@ -19,7 +19,7 @@ export const ModalPopup = ({ selectedDate, logs, closeModal }) => {
       <div className="dialog modal p-4 m-4 rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-lg">Logs for {selectedDate}</h2>
-            <X className = "h-6 w-6 ml-2 text-primary hover:scale-120 transition-colors duration-300 justify-self-end" onClick = {(closeModal)}/> {" "}
+            <X className = "h-6 w-6 ml-2 text-primary hover:scale-120 hover:text-blue-200 transition-colors duration-300 justify-self-end" onClick = {(closeModal)}/> {" "}
         </div>
 
         {dayLogs.length === 0 ? (
