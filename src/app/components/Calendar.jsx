@@ -38,8 +38,9 @@ for (let i = 0; i < firstWeekDay; i++) {
 export const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [posts, setPosts] = useState([]);
+
   const [selectedDate, setSelectedDate] = useState(null);
-  const [phrase, setPhrase] = useState("");
+
 
   const [ isModalOpen, setModalOpen ] = useState(false);
 
@@ -64,25 +65,6 @@ export const Calendar = () => {
     //but, if you try to go ahead, you cannot 
   }
 
-  /* Add post */
-  function addPost() {
-    if (!phrase || !selectedDate) return;
-
-    const newPost = {
-      id: crypto.randomUUID(),
-      date: selectedDate,
-      timestamp: Date.now(),
-      tags: [],
-      phrase,
-    };
-
-    const updated = [...posts, newPost];
-    setPosts(updated);
-    saveToStorage("calendarPosts", updated);
-
-    setPhrase("");
-    setSelectedDate(null);
-  }
 
   /* Group posts by date */
   const postsByDate = posts.reduce((acc, post) => {
@@ -99,7 +81,7 @@ export const Calendar = () => {
     <div className="p-6 max-w-5xl mx-auto">
      <button className="px-3 bg-blue-200 rounded-lg hover:scale-105" onClick = {() => {setModalOpen(!isModalOpen)}}> test button </button>
 
-      { isModalOpen ? ( <ModalPopup isModal = {() => setModalOpen(false)}/>) : null }
+      { isModalOpen ? ( <ModalPopup isModal = {() => setModalOpen(false)} selectedDate={selectedDate}/>) : null }
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">
@@ -140,7 +122,7 @@ export const Calendar = () => {
           return (
             <div
               key={key}
-              onClick={() => setSelectedDate(key)}
+              onClick={() => setModalOpen(!isModalOpen)}
               className={`border rounded p-2 min-h-[100px] cursor-pointer
                 hover:bg-blue-200
                 ${selectedDate === key ? "bg-purple-500" : "bg-white"} 
@@ -152,7 +134,7 @@ export const Calendar = () => {
               </div>
 
               <div className="space-y-1">
-                {dayPosts.map((post) => (
+                {dayPosts.map((post) => ( // this could easily be fixed with a simple filter function based on certain symptoms & severity??
                   <div
                     key={post.id}
                     className="bg-pink-200 text-blue-900 text-xs px-1 py-0.5 rounded"
@@ -167,28 +149,7 @@ export const Calendar = () => {
       </div>
 
       {/* Add Event */}
-      {selectedDate && (
-        <div className="mt-6 p-4 border rounded bg-gray-50">
-          <h3 className="font-semibold mb-2">
-            Add event for {selectedDate}
-          </h3>
-
-          <div className="flex gap-2">
-            <input
-              value={phrase}
-              onChange={(e) => setPhrase(e.target.value)}
-              placeholder="Event phrase"
-              className="flex-1 border rounded px-2 py-1"
-            />
-            <button
-              onClick={addPost}
-              className="px-4 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      )}
+      {selectedDate && isModalOpen}
 
  
     </div>

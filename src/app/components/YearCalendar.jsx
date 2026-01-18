@@ -124,14 +124,18 @@ export const YearCalendar = () => {
                     >
                       <div className="text-xs font-semibold mb-1">{day.getDate()}</div>
                       <div className="space-y-1">
+
+                        {/* with the yearly view, i want it to be constructed more as a heatmap than anything else */}
                         {dayPosts.map(post => (
                           <div
                             key={post.id}
                             className="bg-blue-200 text-blue-900 text-xs px-1 py-0.5 rounded"
                           >
-                            {post.phrase}
+                            {' '} 
                           </div>
-                        ))}
+                        ))} 
+
+
                       </div>
                     </div>
                   );
