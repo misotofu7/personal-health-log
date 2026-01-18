@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from "react";
+import { X } from "lucide-react";
 
-export const ModalPopup = ({isModal}) => {
-    const [selectedDate, setSelectedDate] = useState(null);
+export const ModalPopup = ({isModal, selectedDate}) => {
+    
     const [phrase, setPhrase] = useState("");
 
   /* Add post */
@@ -32,7 +33,7 @@ export const ModalPopup = ({isModal}) => {
        <div className = "dialog">
         <div className = "bg-blue-300 p-8 rounded-lg shadow-xs border border-black max-w-xl">
    <div className = "p-3 rounded-full bg-blue-400 inline-block hover:bg-blue-500 transition-colors duration-1000">
-    <button className = "h-6 w-6 text-blue-300 transition-colors duration-300" onClick = {(isModal)}> close modal </button>
+    <X className = "h-6 w-6 text-blue-300 transition-colors duration-300" onClick = {(isModal)}/> {' '}
     </div>
 
         <div className="mt-6 p-4 border rounded bg-gray-50">

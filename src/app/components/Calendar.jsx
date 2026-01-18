@@ -45,9 +45,11 @@ export const Calendar = () => {
   const [ isModalOpen, setModalOpen ] = useState(false);
 
   /* Load posts */
-  useEffect(() => {
-    setPosts(getFromStorage("calendarPosts", []));
-  }, []);
+ useEffect(() => {
+  fetch("/api/logs")
+    .then(res => res.json())
+    .then(data => setPosts(data.logs)); // ← THIS is the fix
+}, []);
 
 
   /* Month navigation */
