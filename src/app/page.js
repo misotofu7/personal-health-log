@@ -82,6 +82,13 @@ export default function Home() {
     else startListening();
   };
 
+  const symptomSubmit = () => {
+    if (!input.trim()) return;
+
+    console.log("Submitted: ", input);
+    setInput("");
+  };
+
   return (
     <>
       <Navbar user={user} isLoading={isLoading} />
@@ -96,6 +103,12 @@ export default function Home() {
             placeholder={isListening ? "Listening..." : "Describe your symptoms..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                symptomSubmit();
+              }
+            }}
           />
 
           {isSupported && (
